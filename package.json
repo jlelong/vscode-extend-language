@@ -1,0 +1,39 @@
+{
+  "name": "vscode-extend-languageconf",
+  "version": "0.0.0",
+  "description": "Generate a new language configuration file for VS Code by extending an existing one.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jlelong/vscode-extend-languageconf.git"
+  },
+  "keywords": [
+    "vscode",
+    "vs",
+    "code",
+    "visual",
+    "studio",
+    "code",
+    "language",
+    "configuration",
+    "json",
+    "extensions"
+  ],
+  "author": "Jérôme Lelong",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jlelong/vscode-extend-languageconf/issues"
+  },
+  "homepage": "https://github.com/jlelong/vscode-extend-languageconf#readme",
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "got": "^12.0.0",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "eslint": "^8.4.1"
+  }
+}
