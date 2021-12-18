@@ -65,29 +65,6 @@ async function readConfiguration(file, relativeDir) {
     return undefined
 }
 
-function checkStructure(content) {
-    let test = true
-    if (!('brackets' in content && Array.isArray(content['brackets']))) {
-        test = false
-        console.log('Cannot find \'brackets\' or its is not an array')
-    }
-    if (!('autoClosingPairs' in content && Array.isArray(content['autoClosingPairs']))) {
-        test = false
-        console.log('Cannot find \'autoClosingPairs\' or its is not an array.')
-
-    }
-    if (!('surroundingPairs' in content && Array.isArray(content['surroundingPairs']))) {
-        test = false
-        console.log('Cannot find \'surroundingPairs\' or its is not an array.')
-
-    }
-    if (!('wordPattern' in content)) {
-        test = false
-        console.log('Cannot find \'wordPattern\'.')
-    }
-    return true
-}
-
 /**
  * Expand a configuration Object by interpreting the keys `extends` and `overrides`
  * @param {Object} configuration An Object representing a configuration
