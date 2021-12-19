@@ -1,9 +1,6 @@
-'use strict'
-
-const exp = require('constants')
-const fs = require('fs')
-const got = require('got')
-const path = require('path')
+import {readFileSync, writeFileSync} from 'fs'
+import got from 'got'
+import {resolve, dirname} from 'path'
 
 /**
  * Download a file.
@@ -34,11 +31,11 @@ async function readFile(fileOrUrl, relativeDir = '') {
         return content
     } else {
        try {
-           const content = fs.readFileSync(path.resolve(relativeDir, fileOrUrl))
+           const content = readFileSync(resolve(relativeDir, fileOrUrl))
            return content
        } catch (error) {
-        console.log('Cannot read ' + fileOrUrl)
-            console.log(error)
+            console.log('Cannot read ' + fileOrUrl)
+            console.log(error.message)
        }
     }
     return undefined
@@ -50,7 +47,7 @@ async function readFile(fileOrUrl, relativeDir = '') {
  * @param {string} relativeDir The path where to look for file
  * @returns {promise<Object>} A Promise resolving to a dictionary
  */
-async function readConfiguration(file, relativeDir) {
+export async function readConfiguration(file, relativeDir) {
     const content = await readFile(file, relativeDir)
     if (!content) {
         return undefined
@@ -60,7 +57,7 @@ async function readConfiguration(file, relativeDir) {
         return jsonContent
     } catch (error) {
         console.log('Cannot parse content of ' + file)
-        console.log(error)
+        console.log(error.message)
     }
     return undefined
 }
@@ -71,7 +68,7 @@ async function readConfiguration(file, relativeDir) {
  * @param {string} relativeDir The path where to look for files referenced by `extends`
  * @returns {Object} An expanded and self contained version of `configuration`
  */
-async function computeExpansion(configuration, relativeDir) {
+export async function computeExpansion(configuration, relativeDir) {
     if (! ('extends' in configuration)) {
         return configuration
     }
@@ -109,7 +106,7 @@ async function computeExpansion(configuration, relativeDir) {
  * @param {string|number} indent Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.
  * @returns {string} a JSON string
  */
-function dumpJSONDoNotMakeArrayContentPretty(dict, indent) {
+export function dumpJSONDoNotMakeArrayContentPretty(dict, indent) {
     let out = '{'
     if (Number.isInteger(indent)) {
         indent = ' '.repeat(indent)
@@ -150,14 +147,12 @@ function dumpJSONDoNotMakeArrayContentPretty(dict, indent) {
  * @param {string} outFile The path to write the result to
  * @returns void
  */
-async function expandConfiguration(inFile, outFile) {
-    const configuration = await readConfiguration(inFile, __dirname)
+export async function expandConfiguration(inFile, outFile) {
+    const configuration = await readConfiguration(inFile)
     if (!configuration) {
         return
     }
-    const relativeDir = path.dirname(inFile)
-    const expansion = await computeExpansion(configuration, path.resolve(__dirname, relativeDir))
-    fs.writeFileSync(outFile, dumpJSONDoNotMakeArrayContentPretty(expansion, '\t'))
+    const relativeDir = dirname(inFile)
+    const expansion = await computeExpansion(configuration, relativeDir)
+    writeFileSync(outFile, dumpJSONDoNotMakeArrayContentPretty(expansion, '\t'))
 }
-
-module.exports.expandConfiguration = expandConfiguration
