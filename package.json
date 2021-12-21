@@ -5,14 +5,17 @@
     "exports": "./index.js",
     "files": [
         "index.js",
+        "types",
         "*.md"
     ],
+    "types": "types/index.d.ts",
     "type": "module",
     "engines": {
         "node": ">=16.0.0"
     },
     "scripts": {
-        "test": "ava"
+        "test": "ava",
+        "build": "tsc -p ."
     },
     "repository": {
         "type": "git",
@@ -48,6 +51,7 @@
     },
     "devDependencies": {
         "ava": "^3.15.0",
-        "eslint": "^8.4.1"
+        "eslint": "^8.4.1",
+        "typescript": "^4.5.4"
     }
 }

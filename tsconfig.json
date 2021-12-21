@@ -1,0 +1,15 @@
+{
+    "files": [
+        "./index.js"
+    ],
+    "compilerOptions": {
+        "module": "ES2015",
+        "target": "es5",
+        "allowJs": true,
+        "esModuleInterop": true,
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "outDir": "types",
+        "declarationMap": true
+    }
+}
