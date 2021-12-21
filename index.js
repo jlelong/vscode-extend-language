@@ -73,6 +73,10 @@ export async function computeExpansion(configuration, relativeDir) {
         return configuration
     }
     const baseConfig = await readConfiguration(configuration['extends'], relativeDir)
+    if (! baseConfig) {
+        console.log('Cannot open base configuration')
+        return
+    }
     const expandedConfig = Object.assign({}, baseConfig)
 
     for (const key in configuration) {
