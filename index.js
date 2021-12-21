@@ -75,7 +75,7 @@ export async function computeExpansion(configuration, relativeDir) {
     const baseConfig = await readConfiguration(configuration['extends'], relativeDir)
     if (! baseConfig) {
         console.log('Cannot open base configuration')
-        return
+        return undefined
     }
     const expandedConfig = Object.assign({}, baseConfig)
 
@@ -158,5 +158,9 @@ export async function expandConfiguration(inFile, outFile) {
     }
     const relativeDir = dirname(inFile)
     const expansion = await computeExpansion(configuration, relativeDir)
+    if (!expansion) {
+        console.log('Cannot expand input configuration: ' + inFile)
+        return
+    }
     writeFileSync(outFile, dumpJSONDoNotMakeArrayContentPretty(expansion, '\t'))
 }
