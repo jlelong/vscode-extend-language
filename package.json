@@ -1,18 +1,14 @@
 {
     "name": "vscode-extend-languageconf",
-    "version": "0.2.4",
-    "description": "Generate a new language configuration file for VS Code by extending an existing one.",
-    "exports": "./index.js",
+    "version": "0.3.0",
+    "description": "Utility to generate a new language configuration file for VS Code by extending an existing one.",
+    "main": "./index.js",
     "files": [
         "index.js",
         "types",
         "*.md"
     ],
     "types": "types/index.d.ts",
-    "type": "module",
-    "engines": {
-        "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
-    },
     "scripts": {
         "test": "ava",
         "build": "tsc -p ."
@@ -44,10 +40,8 @@
             "test/*.js"
         ]
     },
-    "dependencies": {
-        "got": "^12.0.0"
-    },
     "devDependencies": {
+        "@types/node": "^17.0.4",
         "ava": "^3.15.0",
         "eslint": "^8.4.1",
         "typescript": "^4.5.4"

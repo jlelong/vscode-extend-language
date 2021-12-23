@@ -1,6 +1,6 @@
-import ava from 'ava'
-import {join} from 'path'
-import {readConfiguration, computeExpansion} from '../index.js'
+const ava = require('ava')
+const path = require('path')
+const langConf = require('../index')
 
 const dirTests = 'test/fixtures'
 const allTests = [
@@ -9,14 +9,14 @@ const allTests = [
 
 ava('JSON expansion test', async t => {
     for (const test of allTests) {
-        const inputFile = join(dirTests, test[0])
-        const expectedFile = join(dirTests, test[1])
-        const inConfiguration = await readConfiguration(inputFile)
-        const expectedConfiguration = await readConfiguration(expectedFile)
+        const inputFile = path.join(dirTests, test[0])
+        const expectedFile = path.join(dirTests, test[1])
+        const inConfiguration = await langConf.readConfiguration(inputFile)
+        const expectedConfiguration = await langConf.readConfiguration(expectedFile)
         if (!inConfiguration || !expectedConfiguration) {
             t.fail()
         }
-        const expansion = await computeExpansion(inConfiguration, dirTests)
+        const expansion = await langConf.computeExpansion(inConfiguration, dirTests)
         t.deepEqual(expansion, expectedConfiguration)
     }
 })

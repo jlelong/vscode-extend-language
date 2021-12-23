@@ -1,37 +1,60 @@
-import {readFileSync, writeFileSync} from 'fs'
-import got from 'got'
-import {resolve, dirname} from 'path'
+'use strict'
+const fs = require('fs')
+const path = require('path')
+const https = require('https')
+const url = require('url')
 
 /**
- * Download a file.
- * @param {string} url The url to get.
- * @returns {Promise<string>} a Promise resolving to the body of the file as a string.
+ * Download some content over https.
+ * This function comes from https://github.com/microsoft/vscode-grammar-updater/blob/main/index.js
+ * @param {string} url
+ * @param {number} redirectCount
+ * @param {Object | string | URL} options to be passed to http.get. See http.request for a complete list of accepted options
+ * @returns {Promise<string | undefined>} a Promise resolving to the body of the file as a string.
  */
-async function downloadFile(url) {
-    try {
-        const response = await got(url)
-        return response.body.toString('utf-8')
-    } catch (e) {
-        console.log('Cannot retrieve: ', url)
-        console.log('Error code:', e.response.statusCode)
-        console.log('Error message:', e.response.statusMessage);
-    }
-    return undefined
+ function download(url, options = {}, redirectCount = 0) {
+	return new Promise((c, e) => {
+		var content = ''
+		https.get(url, options, (response) => {
+			response.setEncoding('utf8')
+			response.on('data', (data) => {
+				content += data
+			}).on('end', () => {
+				if (response.statusCode === 403 && response.headers['x-ratelimit-remaining'] === '0') {
+					e('GitHub API rate exceeded. Set GITHUB_TOKEN environment variable to increase rate limit.')
+					return
+				}
+				let count = redirectCount || 0
+				if (count < 5 && response.statusCode >= 300 && response.statusCode <= 303 || response.statusCode === 307) {
+					let location = response.headers['location']
+					if (location) {
+						console.log('Redirected ' + url + ' to ' + location)
+						download(location, options, count + 1).then(c, e)
+						return
+					}
+				}
+				c(content)
+			})
+		}).on('error', (err) => {
+			e(err.message)
+		})
+	})
 }
+
 
 /**
  * Read a file locally or from the web.
  * @param {string} fileOrUrl The url or path of the file to read.
  * @param {string} relativeDir The relative path where to find fileOrUrl. Only used when fileOrUrl is a path.
- * @returns {Promise<string>} A promise resolving to the content of the file.
+ * @returns {Promise<string | undefined>} A promise resolving to the content of the file.
  */
 async function readFile(fileOrUrl, relativeDir = '') {
     if (fileOrUrl.startsWith('https')) {
-        const content = await downloadFile(fileOrUrl)
+        const content = await download(fileOrUrl)
         return content
     } else {
        try {
-           const content = readFileSync(resolve(relativeDir, fileOrUrl))
+           const content = fs.readFileSync(path.resolve(relativeDir, fileOrUrl))
            return content
        } catch (error) {
             console.log('Cannot read ' + fileOrUrl)
@@ -45,9 +68,9 @@ async function readFile(fileOrUrl, relativeDir = '') {
  * Read a configuration as an object
  * @param {string} file The path of the configuration file relative to `relativeDir
  * @param {string} relativeDir The path where to look for file
- * @returns {promise<Object>} A Promise resolving to a dictionary
+ * @returns {promise<Object | undefined>} A Promise resolving to a dictionary
  */
-export async function readConfiguration(file, relativeDir) {
+async function readConfiguration(file, relativeDir) {
     const content = await readFile(file, relativeDir)
     if (!content) {
         return undefined
@@ -66,9 +89,9 @@ export async function readConfiguration(file, relativeDir) {
  * Expand a configuration Object by interpreting the keys `extends` and `overrides`
  * @param {Object} configuration An Object representing a configuration
  * @param {string} relativeDir The path where to look for files referenced by `extends`
- * @returns {Object} An expanded and self contained version of `configuration`
+ * @returns {Promise<Object | undefined>} A promise resolving to an expanded and self contained version of `configuration`
  */
-export async function computeExpansion(configuration, relativeDir) {
+async function computeExpansion(configuration, relativeDir) {
     if (! ('extends' in configuration)) {
         return configuration
     }
@@ -103,6 +126,29 @@ export async function computeExpansion(configuration, relativeDir) {
     return expandedConfig
 }
 
+/**
+ * Get the sha of the last commit in a repo
+ * @param {string} repo The name of the github repository
+ * @param {string} version a git reference (branch, tag)
+ * @returns {Promise<string | undefined>} A promise resolving to the last commit sha
+ */
+async function getCommitSha(repo, version='main') {
+    const lastCommitInfo = 'https://api.github.com/repos/' + repo + '/git/ref/heads/' + version
+    const res = await download(lastCommitInfo, {headers: {'User-Agent': 'vscode-latex-basics'}})
+    if (res === undefined) {
+        console.log('Cannot retrieve last commit sha', lastCommitInfo)
+        return
+    }
+    try {
+        const lastCommit = JSON.parse(res.toString('utf-8'))
+        const sha = lastCommit.object.sha
+        return sha
+    } catch(e) {
+        console.log('Cannot read last commit information')
+        return undefined
+    }
+}
+
 
 /**
  * Convert an Object to JSON but do not pretty print elements of arrays
@@ -110,7 +156,7 @@ export async function computeExpansion(configuration, relativeDir) {
  * @param {string|number} indent Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.
  * @returns {string} a JSON string
  */
-export function dumpJSONDoNotMakeArrayContentPretty(dict, indent) {
+function dumpJSONDoNotMakeArrayContentPretty(dict, indent) {
     let out = '{'
     if (Number.isInteger(indent)) {
         indent = ' '.repeat(indent)
@@ -151,16 +197,23 @@ export function dumpJSONDoNotMakeArrayContentPretty(dict, indent) {
  * @param {string} outFile The path to write the result to
  * @returns void
  */
-export async function expandConfiguration(inFile, outFile) {
+async function expandConfiguration(inFile, outFile) {
     const configuration = await readConfiguration(inFile)
     if (!configuration) {
         return
     }
-    const relativeDir = dirname(inFile)
+    const relativeDir = path.dirname(inFile)
     const expansion = await computeExpansion(configuration, relativeDir)
     if (!expansion) {
         console.log('Cannot expand input configuration: ' + inFile)
         return
     }
-    writeFileSync(outFile, dumpJSONDoNotMakeArrayContentPretty(expansion, '\t'))
+    fs.writeFileSync(outFile, dumpJSONDoNotMakeArrayContentPretty(expansion, '\t'))
 }
+
+exports.download = download
+exports.getCommitSha = getCommitSha
+exports.computeExpansion = computeExpansion
+exports.expandConfiguration = expandConfiguration
+exports.dumpJSONDoNotMakeArrayContentPretty = dumpJSONDoNotMakeArrayContentPretty
+exports.readConfiguration = readConfiguration
