@@ -2,10 +2,10 @@
 const fs = require('fs')
 const path = require('path')
 const https = require('https')
-const url = require('url')
 
 /**
- * Download some content over https.
+ * Retrieve some content over https.
+ *
  * This function comes from https://github.com/microsoft/vscode-grammar-updater/blob/main/index.js
  * @param {string} url
  * @param {number} redirectCount
@@ -49,13 +49,13 @@ const url = require('url')
  * @returns {Promise<string | undefined>} A promise resolving to the content of the file.
  */
 async function readFile(fileOrUrl, relativeDir = '') {
-    if (fileOrUrl.startsWith('https')) {
+    if (fileOrUrl.startsWith('https://')) {
         const content = await download(fileOrUrl)
         return content
     } else {
        try {
            const content = fs.readFileSync(path.resolve(relativeDir, fileOrUrl))
-           return content
+           return content.toString('utf-8')
        } catch (error) {
             console.log('Cannot read ' + fileOrUrl)
             console.log(error.message)
@@ -192,12 +192,12 @@ function dumpJSONDoNotMakeArrayContentPretty(dict, indent) {
 }
 
 /**
- * Generate a self contained configuration
+ * Generate a self contained configuration file
  * @param {string} inFile The path of the configuration to be expanded
  * @param {string} outFile The path to write the result to
  * @returns void
  */
-async function expandConfiguration(inFile, outFile) {
+async function expandConfigurationFile(inFile, outFile) {
     const configuration = await readConfiguration(inFile)
     if (!configuration) {
         return
@@ -212,8 +212,6 @@ async function expandConfiguration(inFile, outFile) {
 }
 
 exports.download = download
+exports.readFile = readFile
 exports.getCommitSha = getCommitSha
-exports.computeExpansion = computeExpansion
-exports.expandConfiguration = expandConfiguration
-exports.dumpJSONDoNotMakeArrayContentPretty = dumpJSONDoNotMakeArrayContentPretty
-exports.readConfiguration = readConfiguration
+exports.expandConfigurationFile = expandConfigurationFile
