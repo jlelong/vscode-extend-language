@@ -1,6 +1,6 @@
-# Extend VS Code language configuration files
+# Utility to extend languages in VS Code
 
-Currently, it is not possible to build a new language as an extension of an existing one, the `language-configuration.json` file must be self-contained. This can lead to tedious maintenance as changes to the base language have to be forwarded manually.  This package aims at helping language developers.
+Currently, it is not possible to build a new language as an extension of an existing one, the `language-configuration.json` file must be self-contained. This can lead to tedious maintenance as changes to the base language have to be forwarded manually. This package aims at helping language developers.
 
 Assume you wand to derive a new language configuration from `A-language-configuration.json`, you just need to define a file let us say `B.extension.language-configuration.json` containing
 
@@ -43,7 +43,7 @@ Assume you wand to derive a new language configuration from `A-language-configur
 To obtain the self-contained language configuration file for `B`, `B.extension.language-configuration.json`, use
 
 ```js
-import {expandConfiguration} from 'vscode-extend-languageconf'
+const vel = require('vscode-extend-language')
 
-expandConfiguration('./B.extension.language-configuration.json', './B.language-configuration.json')
+vel.expandConfigurationFile('./B.extension.language-configuration.json', './B.language-configuration.json')
 ```
