@@ -40,7 +40,7 @@ Assume you wand to derive a new language configuration from `A-language-configur
 - `overrides` enables the developer to replace some settings of `A-language-configuration.json` by their new value.
 - Everything outside `overrides` is added to the configuration. If the key already exists in `A-language-configuration.json`, their contents are concatenated.
 
-To obtain the self-contained language configuration file for `B`, `B.extension.language-configuration.json`, use
+To obtain the self-contained language configuration file for `B`, `B.language-configuration.json`, use
 
 ```js
 const vel = require('vscode-extend-language')
