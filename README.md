@@ -37,8 +37,8 @@ Assume you wand to derive a new language configuration from `A-language-configur
 ```
 
 - `extends` means that language `B` is based on the language configuration of language `A`. `path/to/A-language-configuration.json` can either be a relative local path to `A-language-configuration.json` or an url.
-- `overrides` enables the developer to replace some settings of `A-language-configuration.json` by their new value.
-- Everything outside `overrides` is added to the configuration. If the key already exists in `A-language-configuration.json`, their contents are concatenated.
+- The `overrides` block allows to replace some settings of `A-language-configuration.json` by their new values in `B`.
+- Everything outside the `overrides` block is added to the `B` configuration. If the key already exists in `A-language-configuration.json`, it must be an array and in this case their contents are concatenated.
 
 To obtain the self-contained language configuration file for `B`, `B.language-configuration.json`, use
 
