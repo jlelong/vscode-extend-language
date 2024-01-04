@@ -1,6 +1,6 @@
 {
     "name": "vscode-extend-language",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Utility to generate a new language configuration file for VS Code by extending an existing one.",
     "main": "./index.js",
     "files": [
@@ -41,10 +41,10 @@
         ]
     },
     "devDependencies": {
-        "@types/node": "^17.0.4",
-        "ava": "^3.15.0",
-        "eslint": "^8.4.1",
-        "rewire": "^6.0.0",
-        "typescript": "^4.5.4"
+        "@types/node": "^18.18.0",
+        "ava": "6.0.1",
+        "eslint": "8.56.0",
+        "rewire": "7.0.0",
+        "typescript": "5.3.3"
     }
 }
