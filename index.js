@@ -13,32 +13,32 @@ import stripJsonComments from 'strip-json-comments'
  * @returns {Promise<string | undefined>} a Promise resolving to the body of the file as a string.
  */
 export function download(url, options = {}, redirectCount = 0) {
-	return new Promise((c, e) => {
-		var content = ''
-		https.get(url, options, (response) => {
-			response.setEncoding('utf8')
-			response.on('data', (data) => {
-				content += data
-			}).on('end', () => {
-				if (response.statusCode === 403 && response.headers['x-ratelimit-remaining'] === '0') {
-					e('GitHub API rate exceeded. Set GITHUB_TOKEN environment variable to increase rate limit.')
-					return
-				}
-				let count = redirectCount || 0
-				if (count < 5 && response.statusCode >= 300 && response.statusCode <= 303 || response.statusCode === 307) {
-					let location = response.headers['location']
-					if (location) {
-						console.log('Redirected ' + url + ' to ' + location)
-						download(location, options, count + 1).then(c, e)
-						return
-					}
-				}
-				c(content)
-			})
-		}).on('error', (err) => {
-			e(err.message)
-		})
-	})
+    return new Promise((c, e) => {
+        var content = ''
+        https.get(url, options, (response) => {
+            response.setEncoding('utf8')
+            response.on('data', (data) => {
+                content += data
+            }).on('end', () => {
+                if (response.statusCode === 403 && response.headers['x-ratelimit-remaining'] === '0') {
+                    e('GitHub API rate exceeded. Set GITHUB_TOKEN environment variable to increase rate limit.')
+                    return
+                }
+                let count = redirectCount || 0
+                if (count < 5 && response.statusCode >= 300 && response.statusCode <= 303 || response.statusCode === 307) {
+                    let location = response.headers['location']
+                    if (location) {
+                        console.log('Redirected ' + url + ' to ' + location)
+                        download(location, options, count + 1).then(c, e)
+                        return
+                    }
+                }
+                c(content)
+            })
+        }).on('error', (err) => {
+            e(err.message)
+        })
+    })
 }
 
 
