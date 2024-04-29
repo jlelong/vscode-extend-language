@@ -1,7 +1,7 @@
-'use strict'
-const fs = require('fs')
-const path = require('path')
-const https = require('https')
+import fs from 'fs'
+import path from 'path'
+import https from 'https'
+import stripJsonComments from 'strip-json-comments'
 
 /**
  * Retrieve some content over https.
@@ -12,7 +12,7 @@ const https = require('https')
  * @param {Object | string | URL} options to be passed to http.get. See http.request for a complete list of accepted options
  * @returns {Promise<string | undefined>} a Promise resolving to the body of the file as a string.
  */
- function download(url, options = {}, redirectCount = 0) {
+export function download(url, options = {}, redirectCount = 0) {
 	return new Promise((c, e) => {
 		var content = ''
 		https.get(url, options, (response) => {
@@ -48,7 +48,7 @@ const https = require('https')
  * @param {string} relativeDir The relative path where to find fileOrUrl. Only used when fileOrUrl is a path.
  * @returns {Promise<string | undefined>} A promise resolving to the content of the file.
  */
-async function readFile(fileOrUrl, relativeDir = '') {
+export async function readFile(fileOrUrl, relativeDir = '') {
     if (fileOrUrl.startsWith('https://')) {
         const content = await download(fileOrUrl)
         return content
@@ -70,13 +70,13 @@ async function readFile(fileOrUrl, relativeDir = '') {
  * @param {string} relativeDir The path where to look for file
  * @returns {promise<Object | undefined>} A Promise resolving to a dictionary
  */
-async function readConfiguration(file, relativeDir) {
+export async function readConfiguration(file, relativeDir) {
     const content = await readFile(file, relativeDir)
     if (!content) {
         return undefined
     }
     try {
-        const jsonContent = JSON.parse(content)
+        const jsonContent = JSON.parse(stripJsonComments(content))
         return jsonContent
     } catch (error) {
         console.log('Cannot parse content of ' + file)
@@ -91,7 +91,7 @@ async function readConfiguration(file, relativeDir) {
  * @param {string} relativeDir The path where to look for files referenced by `extends`
  * @returns {Promise<Object | undefined>} A promise resolving to an expanded and self contained version of `configuration`
  */
-async function computeExpansion(configuration, relativeDir) {
+export async function computeExpansion(configuration, relativeDir) {
     if (! ('extends' in configuration)) {
         return configuration
     }
@@ -132,7 +132,7 @@ async function computeExpansion(configuration, relativeDir) {
  * @param {string} version a git reference (branch, tag)
  * @returns {Promise<string | undefined>} A promise resolving to the last commit sha
  */
-async function getCommitSha(repo, version='main') {
+export async function getCommitSha(repo, version='main') {
     const lastCommitInfo = 'https://api.github.com/repos/' + repo + '/git/ref/heads/' + version
     const res = await download(lastCommitInfo, {headers: {'User-Agent': 'vscode-latex-basics'}})
     if (res === undefined) {
@@ -156,7 +156,7 @@ async function getCommitSha(repo, version='main') {
  * @param {string|number} indent Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.
  * @returns {string} a JSON string
  */
-function dumpJSONDoNotMakeArrayContentPretty(dict, indent) {
+export function dumpJSONDoNotMakeArrayContentPretty(dict, indent) {
     let out = '{'
     if (Number.isInteger(indent)) {
         indent = ' '.repeat(indent)
@@ -197,7 +197,7 @@ function dumpJSONDoNotMakeArrayContentPretty(dict, indent) {
  * @param {string} outFile The path to write the result to
  * @returns void
  */
-async function expandConfigurationFile(inFile, outFile) {
+export async function expandConfigurationFile(inFile, outFile) {
     const configuration = await readConfiguration(inFile)
     if (!configuration) {
         return
@@ -211,7 +211,3 @@ async function expandConfigurationFile(inFile, outFile) {
     fs.writeFileSync(outFile, dumpJSONDoNotMakeArrayContentPretty(expansion, '\t'))
 }
 
-exports.download = download
-exports.readFile = readFile
-exports.getCommitSha = getCommitSha
-exports.expandConfigurationFile = expandConfigurationFile

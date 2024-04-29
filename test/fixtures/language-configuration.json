@@ -65,6 +65,7 @@
 		["$", "$"]
 	],
 	"indentationRules": {
+		// Don't indent main environment
 		"increaseIndentPattern": "\\\\begin{(?!document)([^}]*)}(?!.*\\\\end{\\1})",
 		"decreaseIndentPattern": "^\\s*\\\\end{(?!document)"
 	},
