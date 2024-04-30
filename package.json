@@ -1,6 +1,6 @@
 {
     "name": "vscode-extend-language",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "Utility to generate a new language configuration file for VS Code by extending an existing one.",
     "type": "module",
     "exports": "./index.js",
