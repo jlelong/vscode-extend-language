@@ -34,3 +34,12 @@ ava('Print configuration test', async t => {
         t.is(out, expectedConfigurationAsString)
     }
 })
+
+ava('Test remote download', async t => {
+    const url = 'https://raw.githubusercontent.com/jlelong/vscode-latex-basics/main/languages/latex-cpp-embedded-language-configuration.json'
+    var content = await vel.download(url)
+    if (!content) {
+        t.fail()
+    }
+    t.pass()
+})
